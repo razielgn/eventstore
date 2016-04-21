@@ -67,35 +67,35 @@ function streamEventsOut(res, done) {
   };
 }
 
-app.get('/events/:from/:to', function(req, res) {
+app.get('/events/:from/?', function(req, res) {
   var from = req.params.from;
-  var to = req.params.to;
 
   pg.connect(connString, function(err, client, done) {
     var query = client.query(
       `select payload::text
       from events
-      where received_at between $1 and $2
-      order by received_at;`,
-      [from, to],
+      where received_at >= $1
+      order by received_at
+      limit 500;`,
+      [from],
       streamEventsOut(res, done)
     );
   });
 });
 
-app.get('/events/:from/:to/:types', function(req, res) {
+app.get('/events/:from/:types', function(req, res) {
   var from = req.params.from;
-  var to = req.params.to;
   var types = req.params.types.split(',');
 
   pg.connect(connString, function(err, client, done) {
     var query = client.query(
       `select payload::text
       from events
-      where received_at between $1 and $2
-      and type = any($3::text[])
-      order by received_at;`,
-      [from, to, types],
+      where received_at >= $1
+      and type = any($2::text[])
+      order by received_at
+      limit 500;`,
+      [from, types],
       streamEventsOut(res, done)
     );
   });
