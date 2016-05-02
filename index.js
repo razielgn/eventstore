@@ -75,7 +75,6 @@ app.get('/events/:from/?', function(req, res) {
       `select payload::text
       from events
       where received_at >= $1
-      order by received_at
       limit 500;`,
       [from],
       streamEventsOut(res, done)
@@ -93,7 +92,6 @@ app.get('/events/:from/:types', function(req, res) {
       from events
       where received_at >= $1
       and type = any($2::text[])
-      order by received_at
       limit 500;`,
       [from, types],
       streamEventsOut(res, done)
